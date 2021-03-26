@@ -15,6 +15,8 @@ library(CatEncoders)
 library(MLmetrics)
 library(ROSE)
 library(smotefamily)
+library(ggplot2)
+library(GGally)
 ui <- dashboardPage(
   dashboardHeader(
     title="FERRAH & GHARBI"
@@ -39,7 +41,7 @@ ui <- dashboardPage(
                menuSubItem("Univariee", tabName = "quant", icon=icon("dice-one")),
                menuSubItem("Bivariee", tabName = "qual", icon=icon("dice-two")),
                menuSubItem("Qualitative VS Quantitative", tabName = "vs", icon=icon("chart-pie")),
-               menuSubItem("Qualitative VS Quantitative", tabName = "vs2", icon=icon("chart-pie"))),
+               menuSubItem("Qualitative VS Qualitative", tabName = "vs2", icon=icon("chart-pie"))),
       
       menuItem("Churn", tabName="churn", icon=icon("recycle"),
                menuSubItem("Churn Variable", tabName = "ChurnIn", icon=icon("dice-one")),
@@ -102,12 +104,12 @@ ui <- dashboardPage(
                   column(6,uiOutput('quantlistbi1'),
                          #varSelectInput("choix", "Le choix de la variable", data(), multiple = FALSE),
                          #selectInput("choix", "Le choix de la variable",
-                                     #tableOutput(outputId = "input_list"),selected = 1),
+                         #tableOutput(outputId = "input_list"),selected = 1),
                          
                   ),
                   column(6,uiOutput('quantlistbi2'),
                          #selectInput("choixx", "Le choix de la variable",
-                          #           tableOutput(outputId = "input_list"),selected = 1),
+                         #           tableOutput(outputId = "input_list"),selected = 1),
                          
                   )
                   
@@ -218,7 +220,7 @@ ui <- dashboardPage(
                                    )
                          )
                          
-                         ), 
+                ), 
                 tabPanel("Variables Qualitatives", 
                          fluidRow(uiOutput('qualist'),
                                   tabsetPanel(
@@ -229,19 +231,19 @@ ui <- dashboardPage(
                                                                                           h5("Courbe cumulative", align ="center"),
                                                                                           plotOutput(outputId = "effectifsDiagq")))),
                                     tabPanel("Diagrammes",fluidPage(column(6,
-                                                                                          h5("Diagramme en colonnes", align = "center"),
+                                                                           h5("Diagramme en colonnes", align = "center"),
                                                                            plotOutput("colonnes")),
-                                                                                   column(6,
-                                                                                          h5("Diagramme en secteurs", align ="center"),
-                                                                                          plotOutput("secteurs"))))
+                                                                    column(6,
+                                                                           h5("Diagramme en secteurs", align ="center"),
+                                                                           plotOutput("secteurs"))))
                                   ),
-                           
-                           
-                           
+                                  
+                                  
+                                  
                          ))
               ),
               
-              ),
+      ),
       
       tabItem(tabName = "vs",
               h3("Quantitative VS Qualitative  ",align = "center"),
@@ -315,7 +317,6 @@ ui <- dashboardPage(
                 , style = "font-size: 75%")),
       
       tabItem(tabName = "accueill",
-              img(src="iris.jpg", style=" width:27%",align = "center"),
               h3(" A propos du tp ",align = "center"),
               br(),
               br(),
@@ -343,70 +344,94 @@ L’utilisateur à la possibilité de l’explorer.
               h3("Réalisé Par : FERRAH Hichem & GHARBI Mohamed",align = "center")
       ),
       
-#-------------------- CHURN -------------
-tabItem(tabName = "ChurnIn", 
-        uiOutput('churnchoice'), plotlyOutput(outputId = "churnIntro1")),
-tabItem(tabName = "ChurnQual", 
-        uiOutput('churnqual'),plotlyOutput(outputId = "churnqualplot"),
-        ),
-tabItem(tabName = "ChurnQuant", 
-        uiOutput('churnquant'),sliderInput('sliderquant', "Ajuster la distribution pour ameliorer le Rendu ", 1, 5, 3,1),plotlyOutput(outputId = "churnquantplot")
-        
-),
-#---------------------- Apprentissage Unbalanced ------------
-tabItem(tabName = "app",
-        
-        
-        mainPanel(
-          
-          
-          tabsetPanel(
-            tabPanel("KNN", 
-                     fluidRow(
-                       
-                       h3("Apprentissage Supervise knn", align="center"),
-                       column(6, plotOutput("plot1"))
-                       
-                     )
-            ),
-            tabPanel("LR", 
-                     fluidRow(
-                       h3("Apprentissage Supervise LR", align="center"),
-                       column(8, offset = 1, plotOutput("plot2"), style="width: 850px !important")
-                     )
-                     
-            )))),
-#---------------------- data Balancing ---------------
-tabItem(tabName = "databalance",
-        
-        
-        mainPanel(
-          
-          
-          tabsetPanel(
-            tabPanel("Equilibre", 
-                     fluidRow(
-                       
-                       column(12,uiOutput("varbalance"),uiOutput("sampling"),uiOutput("go"),plotlyOutput("compare") )
-                       
-                     )
-            ),
-            tabPanel("KNN", 
-                     fluidRow(
-                       
-                       h3("Apprentissage Supervise knn", align="center"),
-                       column(6, plotOutput("plot4"))
-                       
-                     )
-            ),
-            tabPanel("LR", 
-                     fluidRow(
-                       h3("Apprentissage Supervise LR", align="center"),
-                       column(8, offset = 1, plotOutput("plot5"), style="width: 850px !important")
-                     )
-                     
-            ))))
-
+      
+      
+      
+      #-------------------- CHURN -------------
+      tabItem(tabName = "ChurnIn", 
+              uiOutput('churnchoice'), plotlyOutput(outputId = "churnIntro1")),
+      tabItem(tabName = "ChurnQual", 
+              uiOutput('churnqual'),plotlyOutput(outputId = "churnqualplot"),
+      ),
+      tabItem(tabName = "ChurnQuant", 
+              uiOutput('churnquant'),
+              tabsetPanel(
+                
+                
+                tabPanel("Pie Charts", 
+                         sliderInput('sliderquant', "Ajuster la distribution pour ameliorer le Rendu ", 1, 5, 3,1),plotlyOutput(outputId = "churnquantplot")
+                         
+                         
+                ),
+                tabPanel("Bar plots", 
+                         plotlyOutput(outputId = "churnquantplot2"))
+                ,
+                tabPanel("pairwise Scatter", 
+                         uiOutput('pairwise1'),uiOutput('pairwise2'),
+                         plotOutput(outputId = "churnquantplot3")
+                         
+                )
+                
+              ) 
+              
+      ),      
+      
+      
+      
+      #---------------------- Apprentissage Unbalanced ------------
+      tabItem(tabName = "app",
+              
+              
+              mainPanel(
+                
+                
+                tabsetPanel(
+                  tabPanel("KNN", 
+                           fluidRow(
+                             
+                             h3("Apprentissage Supervise knn", align="center"),
+                             column(6, plotOutput("plot1"))
+                             
+                           )
+                  ),
+                  tabPanel("LR", 
+                           fluidRow(
+                             h3("Apprentissage Supervise LR", align="center"),
+                             column(8, offset = 1, plotOutput("plot2"), style="width: 850px !important")
+                           )
+                           
+                  )))),
+      #---------------------- data Balancing ---------------
+      tabItem(tabName = "databalance",
+              
+              
+              mainPanel(
+                
+                
+                tabsetPanel(
+                  tabPanel("Equilibre", 
+                           fluidRow(
+                             
+                             column(12,uiOutput("varbalance"),uiOutput("sampling"),uiOutput("go"),plotlyOutput("compare") )
+                             
+                           )
+                  ),
+                  tabPanel("KNN", 
+                           fluidRow(
+                             
+                             h3("Apprentissage Supervise knn", align="center"),
+                             column(6, plotOutput("plot4"))
+                             
+                           )
+                  ),
+                  tabPanel("LR", 
+                           fluidRow(
+                             h3("Apprentissage Supervise LR", align="center"),
+                             column(8, offset = 1, plotOutput("plot5"), style="width: 850px !important")
+                           )
+                           
+                  ))))
+      
       
     )
   )
@@ -486,6 +511,12 @@ server <- function(input, output) {
   output$varbalance = renderUI({
     selectInput("varbalance", 'Choisissez une Variable Binaire "Desiquilibre" ', names(data()))
   })
+  output$pairwise1 = renderUI({
+    selectInput('pairwise1', 'Choisissez une 2eme Variable', names(data())[!grepl('factor|logical|character',sapply(data(),class))])
+  })
+  output$pairwise2 = renderUI({
+    selectInput('pairwise2', 'Choisissez une 3eme Variable', names(data())[!grepl('factor|logical|character',sapply(data(),class))])
+  })
   output$go =renderUI({
     validate(
       need(nrow(unique(data()[input$varbalance])) == 2, "... En attente de la variable ...")
@@ -553,7 +584,7 @@ server <- function(input, output) {
                      fixedColumns = TRUE), 
       rownames = FALSE)
     
-      })
+  })
   
   
   
@@ -683,7 +714,7 @@ server <- function(input, output) {
     
     dt = data()
     return(table(dt[,input$choixx]))
-    })
+  })
   
   # Diagramme en colonnes
   output$colonnes <- renderPlot({
@@ -818,7 +849,7 @@ server <- function(input, output) {
   # Unidimensionnel
   output$barplotUni <- renderPlot({
     # Diagramme en barres de la variable 'Level' avec ggplot
-  
+    
     # list<-as.list(data()[,input$quantlistvs])
     # print(list)
     # ggplot(data(), aes(x = paste(data))) + geom_bar(stat="identity")
@@ -869,7 +900,7 @@ server <- function(input, output) {
     tab
     print(tab)
   })
-#------------------ CHURN PART : ---------------
+  #------------------ CHURN PART : ---------------
   churnvar <- reactive({
     validate(
       need(nrow(unique(data()[input$churnchoice])) == 2, "Cette Variable ne peut pas etre une Varibale Churn Veuillez choisir une autre (Variable Binaire).")
@@ -912,463 +943,558 @@ server <- function(input, output) {
              showlegend = TRUE)
     return(plot)
   })
-
-slidervalues<- reactive({
-  values<-data()[input$churnchoice]
-  max<-max(values)*0.5
-  min<-min(values)*0.05
   
-  
-})
-output$churnqualplot  <- renderPlotly({
-  print(nrow(count(names(data())[grepl('factor|logical|character',sapply(data(),class))])))
-  validate(
-    need(nrow(unique(data()[input$churnchoice])) == 2, "Veuillez Choisir une variable Churn dans l'onglet 'Churn Variable' "),
-    need(nrow(count(names(data())[grepl('factor|logical|character',sapply(data(),class))])) != 0, "Aucune Variable qualitative Detecte")
-  )
-  filtervar1 <- data()
-  filtervar2 <- data()
-  var <- input$churnchoice
-  values<-unique(data()[var])
-  print(values)
-  print(values[1,1])
-  print(values[2,1])
-  valeurchurn1 <- values[1,1]
-  valeurchurn2 <- values[2,1]
-  
-  filtervar1 <- data()[data()[var] == valeurchurn1, input$churnqual]
-  filtervar2 <- data()[data()[var] == valeurchurn2, input$churnqual]
-  
-  
-  
-  var1<-as.data.frame(filtervar1)
-  freq<- count(var1) 
-  print(freq)
-  freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
-  colnames(freq) <- c("value","occu","percent")
-  print(freq)
-  
-  # Compute the cumulative percentages (top of each rectangle)
-  freq$ymax <- cumsum(freq$percent)
-  
-  # Compute the bottom of each rectangle
-  freq$ymin <- c(0, head(freq$ymax, n=-1))
-  
-  # Compute label position
-  freq$labelPosition <- (freq$ymax + freq$ymin) / 2
-  
-  # Compute a good label
-  freq$label <- paste0(freq$percent,"%")
-  print(freq)
-  # Make the plot
-  var2<-as.data.frame(filtervar2)
-  freq2<- count(var2) 
-  print("freq2")
-  print(freq2)
-  freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
-  colnames(freq2) <- c("value","occu","percent")
-  print(freq2)
-  
-  # Compute the cumulative percentages (top of each rectangle)
-  freq2$ymax <- cumsum(freq2$percent)
-  
-  # Compute the bottom of each rectangle
-  freq2$ymin <- c(0, head(freq2$ymax, n=-1))
-  
-  # Compute label position
-  freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
-  
-  # Compute a good label
-  freq2$label <- paste0(freq2$percent,"%")
-  print(freq2)
-  # Make the plot
-  
-  print(values[1,1])
-  print(values[2,1])
-  plot <- plot_ly(labels = ~value, values = ~percent,textinfo = 'value+percent') %>%
-    add_pie(data = freq, name = values[1,1], domain = list(row = 0, column = 0))%>%
-    add_pie(data = freq2, name = values[2,1], domain = list(row = 0, column = 1))%>%
-    layout(title = paste("Distribution de",input$churnqual,"par rapport a ",input$churnchoice), showlegend = T,
-           grid=list(rows=1, columns=2),
-           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           annotations = list(x = c(0, .5),
-             y = c(0, 0),text = c(paste("Distribution \n % Churn = ", values[1,1]),paste("Distribution \n % Churn = ", values[2,1])),
-             xref = "papper",
-             yref = "papper",
-             showarrow = F
-           ))
-  
-  return(plot)
+  slidervalues<- reactive({
+    values<-data()[input$churnchoice]
+    max<-max(values)*0.5
+    min<-min(values)*0.05
+    
+    
   })
-output$plot1 <- renderPlot({
-  
-  
-  df<- data.frame(lapply(data(), function(x) {
-    if(!is.numeric(x)) as.numeric(factor(x)) else x
-  }))
-  df$y <- ifelse(df$y==1,0,1)
-  samples <- sample(1:nrow(df), 0.7*nrow(df))
-  trainclass <- df[samples, ]$y
-  testclass <- df[-samples, ]$y
-  train = df[samples, 1:(ncol(df)-1)]
-  test = df[-samples, 1:(ncol(df)-1)]
-  kmax <- 10
-  err_valid <- rep(NA,kmax)
-  for (k in 1:kmax) 
-  { 
-    print(k)
-    samples <- sample(1:nrow(df), 0.7*nrow(df))
-    pred <- knn(train,test,trainclass,k=18) 
-    err_valid[k] <- F1_Score(y_pred=pred,y_true=testclass)
-  } 
-  #plot(x=seq(1,kmax,by=1),y=err_test,type="o",col="blue")
-  boxplot(err_valid)
-  
-  
-})
-output$plot2 <- renderPlot({
-  df <- data()
-  df$y <- ifelse(df$y=="no",0,1)
-  kmax <- 10
-  err_valid <- rep(NA,kmax) 
-  for (k in 1:kmax) 
-  { 
-    samples <- sample(1:nrow(df), 0.7*nrow(df))
-    test_y <- df[-samples, ncol(df)]
-    test_X <- df[-samples, 1:(ncol(df)-1)]
-    print(k)
-    train <- df[samples, ]
-    model <- glm(y ~ .,data = train)
-    pred <- predict(model,test_X,type="response")
-    pred <- ifelse(pred>0.5,1,0)
-    err_valid[k] <- F1_Score(y_pred=pred,y_true=test_y)
+  output$churnqualplot  <- renderPlotly({
+    print(nrow(count(names(data())[grepl('factor|logical|character',sapply(data(),class))])))
+    validate(
+      need(nrow(unique(data()[input$churnchoice])) == 2, "Veuillez Choisir une variable Churn dans l'onglet 'Churn Variable' "),
+      need(nrow(count(names(data())[grepl('factor|logical|character',sapply(data(),class))])) != 0, "Aucune Variable qualitative Detecte")
+    )
+    filtervar1 <- data()
+    filtervar2 <- data()
+    var <- input$churnchoice
+    values<-unique(data()[var])
+    print(values)
+    print(values[1,1])
+    print(values[2,1])
+    valeurchurn1 <- values[1,1]
+    valeurchurn2 <- values[2,1]
     
-  } 
-  
-  boxplot(err_valid)
-  
-})
-output$churnquantplot  <- renderPlotly({
-  print(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])))
-  validate(
-    need(nrow(unique(data()[input$churnchoice])) == 2, "Veuillez Choisir une variable Churn dans l'onglet 'Churn Variable' "),
-    need(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])) != 0, "Aucune Variable qualitative Detecte")
-  )
-  filtervar1 <- data()
-  filtervar2 <- data()
-  var <- input$churnchoice
-  values<-unique(data()[var])
-  print(values)
-  print(values[1,1])
-  print(values[2,1])
-  valeurchurn1 <- values[1,1]
-  valeurchurn2 <- values[2,1]
-  
-  filtervar1 <- data()[data()[var] == valeurchurn1, input$churnquant]
-  filtervar2 <- data()[data()[var] == valeurchurn2, input$churnquant]
-  maxvar1<-max(filtervar1)
-  maxvar2<-max(filtervar2)
-  minvar1<-min(filtervar1)
-  minvar2<-min(filtervar2)
-  
-  stepvar1<-abs((1/(2**(input$sliderquant-1)))*maxvar1)
-  stepvar2<-abs((1/(2**(input$sliderquant-1)))*maxvar2)
-  length<-2**(input$sliderquant)
-  print(input$sliderquant)
-  print(stepvar1)
-  print(stepvar2)
-  filtervar1<-cut(filtervar1, seq(minvar1,maxvar1,length.out = length))
-  filtervar2<-cut(filtervar2, seq(minvar2,maxvar2,length.out = length))
-  
-  
-  var1<-as.data.frame(filtervar1)
-  freq<- count(var1) 
-  print(freq)
-  freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
-  colnames(freq) <- c("value","occu","percent")
-  print(freq)
-  
-  # Compute the cumulative percentages (top of each rectangle)
-  freq$ymax <- cumsum(freq$percent)
-  
-  # Compute the bottom of each rectangle
-  freq$ymin <- c(0, head(freq$ymax, n=-1))
-  
-  # Compute label position
-  freq$labelPosition <- (freq$ymax + freq$ymin) / 2
-  
-  # Compute a good label
-  freq$label <- paste0(freq$percent,"%")
-  print(freq)
-  # Make the plot
-  var2<-as.data.frame(filtervar2)
-  freq2<- count(var2) 
-  print("freq2")
-  print(freq2)
-  freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
-  colnames(freq2) <- c("value","occu","percent")
-  print(freq2)
-  
-  # Compute the cumulative percentages (top of each rectangle)
-  freq2$ymax <- cumsum(freq2$percent)
-  
-  # Compute the bottom of each rectangle
-  freq2$ymin <- c(0, head(freq2$ymax, n=-1))
-  
-  # Compute label position
-  freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
-  
-  # Compute a good label
-  freq2$label <- paste0(freq2$percent,"%")
-  print(freq2)
-  # Make the plot
-  
-  print(values[1,1])
-  print(values[2,1])
-  plot <- plot_ly(labels = ~value, values = ~percent,textinfo = 'value+percent') %>%
-    add_pie(data = freq, name = values[1,1], domain = list(row = 0, column = 0))%>%
-    add_pie(data = freq2, name = values[2,1], domain = list(row = 0, column = 1))%>%
-    layout(title = paste("Distribution de",input$churnquant,"par rapport a ",input$churnchoice), showlegend = T,
-           grid=list(rows=1, columns=2),
-           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           annotations = list(x = c(0, .5),
-                              y = c(0, 0),text = c(paste("Distribution \n % Churn = ", values[1,1]),paste("Distribution \n % Churn = ", values[2,1])),
-                              xref = "papper",
-                              yref = "papper",
-                              showarrow = F
-           ))
-  
-  return(plot)
-})
-
-
-#------------------ Balanced Data -----------------
-samplevalue<- reactive({
-  validate(
-    need(nrow(unique(data()[input$varbalance])) == 2, "... En attente de la variable ...")
-  )
-  method<-input$sampling
-  choice<-input$varbalance
-  df<- data.frame(lapply(data(), function(x) {
-    if(!is.numeric(x)) as.numeric(factor(x)) else x
-  }))
-  df[,input$varbalance] <- ifelse(df[,input$varbalance]==1,0,1)
-  samples <- sample(1:nrow(df), 0.7*nrow(df))
-  train = df[samples, 1:(ncol(df))]
-  
-  data<-train
-  
-  values<-unique(data[choice])
-  
-  print(values)
-  print(values[1,1])
-  print(values[2,1])
-  valeurchoice1 <- values[1,1]
-  valeurchoice2 <- values[2,1]
-  print(valeurchoice1)
-  print("----------------------------------")
-  print(method)
-  var1<-as.data.frame(data[data[choice] == valeurchoice1,choice])
-  var2<-as.data.frame(data[data[choice] == valeurchoice2,choice])
-  print(count(var1))
-  if(method=="Random Oversampling"){
-   
-    n_samp<-max(count(var1)$freq,count(var2)$freq)
-    print("n_samp")
-    print(n_samp)
-    return(n_samp)
-  }
-  if(method=="Random UnderSampling"){
-
-    n_samp<-min(count(var1)$freq,count(var2)$freq)
-    print("n_samp")
-    print(n_samp)
-    return(n_samp)
-  }
-  if(method=="Both"){
-    n_samp<-max(count(var1)$freq,count(var2)$freq)
-    print("n_samp")
-    print(n_samp)
-    return(n_samp)
-  }
-  # if(method=="Smote"){
-  #   n_samp<-max(count(var1)$freq,count(var2)$freq)
-  #   n_samp<-cbind(n_samp,min(count(var1)$freq,count(var2)$freq))
-  #   print(method)
-  #   return(n_samp)
-  # }
-  
-})
-
-balanceddata<- eventReactive(input$go,{
-  print("worked!")
-  df<- data.frame(lapply(data(), function(x) {
-    if(!is.numeric(x)) as.numeric(factor(x)) else x
-  }))
-  df[,input$varbalance] <- ifelse(df[,input$varbalance]==1,0,1)
-  samples <- sample(1:nrow(df), 0.7*nrow(df))
-  train = df[samples, 1:(ncol(df))]
-  
-  data<-train
-  print(data)
-  method<-input$sampling
-  choice<-input$varbalance
-  n_samp<-samplevalue()*2
-  f<-paste(choice," ~ ",paste(names(data()[names(data())!=choice]),collapse=" + "))
-  print(paste("f = ",f))
-  print(paste("f as formula = ",f))
-  f<-as.formula(f)
-  curr_frame <<- sys.nframe()
-  if(method=="Random Oversampling"){
-    over_res<-ovun.sample(get("f", sys.frame(curr_frame)), data=get("data", sys.frame(curr_frame)), method="over", N=get("n_samp", sys.frame(curr_frame)), seed=2021)$data
-    print(over_res)
-    return(over_res)
-  }
-  if(method=="Random UnderSampling"){
-    under_res<-ovun.sample(get("f", sys.frame(curr_frame)), data=get("data", sys.frame(curr_frame)), method="under", N=get("n_samp", sys.frame(curr_frame)), seed=2021)$data
-    print(under_res)
-    return(under_res)
-  }
-  if(method=="Both"){
-    both_res<-ovun.sample(get("f", sys.frame(curr_frame)), data=get("data", sys.frame(curr_frame)), method="both", N=get("n_samp", sys.frame(curr_frame)),p=0.5, seed=2021)$data
-    print(both_res)
-    return(both_res)
-  }
-  # if(method=="Smote"){
-  #   n1<-n_samp[0]
-  #   n0<-n_samp[1]
-  #   r0<-0.6
-  #   ntimes<-(( 1 - r0) / r0 ) * ( n0 / n1 ) - 1
-  #   data[input$varbalance]<-factor(data[input$varbalance])
-  #   print(names(data[names(data)!=input$varbalance]))
-  #   smote_res<-SMOTE(X = data[names(data)!=input$varbalance], target = data[input$varbalance], K = 5, dup_size = ntimes)$data
-  #   print(smote_res)
-  #   return(smote_res)}
-})
-output$compare<-renderPlotly({
-  print("I'm here -1 ")
-
-  print("I'm here 0 ")
-  var <- input$varbalance
-  filtervar1 <- data()[var] 
-  filtervar2 <- balanceddata()[var] 
-  print("I'm here 2 ")
-  
-  var1<-as.data.frame(filtervar1)
-  freq<- count(var1) 
-  print(freq)
-  freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
-  colnames(freq) <- c("value","occu","percent")
-  print(freq)
-  print("I'm here 3 ")
-  # Compute the cumulative percentages (top of each rectangle)
-  freq$ymax <- cumsum(freq$percent)
-  
-  # Compute the bottom of each rectangle
-  freq$ymin <- c(0, head(freq$ymax, n=-1))
-  
-  # Compute label position
-  freq$labelPosition <- (freq$ymax + freq$ymin) / 2
-  
-  # Compute a good label
-  freq$label <- paste0(freq$percent,"%")
-  print(freq)
-  # Make the plot
-  var2<-as.data.frame(filtervar2)
-  freq2<- count(var2) 
-  print("freq2")
-  print(freq2)
-  freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
-  colnames(freq2) <- c("value","occu","percent")
-  print(freq2)
-  
-  # Compute the cumulative percentages (top of each rectangle)
-  freq2$ymax <- cumsum(freq2$percent)
-  
-  # Compute the bottom of each rectangle
-  freq2$ymin <- c(0, head(freq2$ymax, n=-1))
-  
-  # Compute label position
-  freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
-  
-  # Compute a good label
-  freq2$label <- paste0(freq2$percent,"%")
-  print(freq2)
-  # Make the plot
-  plot <- plot_ly(labels = ~value, values = ~percent,textinfo = 'occu',hovertext=~occu) %>%
-    add_pie(data = freq, name = 'Avant', domain = list(row = 0, column = 0))%>%
-    add_pie(data = freq2, name = 'Apres', domain = list(row = 0, column = 1))%>%
-    layout(title = paste("Comparaisons des donnees avant et apres le sampling "), showlegend = T,
-           grid=list(rows=1, columns=2),
-           xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-           annotations = list(x = c(0, .5),
-                              y = c(0, 0),text = c("Avant","Apres"),
-                              xref = "papper",
-                              yref = "papper",
-                              showarrow = F
-           ))
-  
-  return(plot)
-  
-})
-output$balancedplot <- renderPlotly({
-  
-  plot_ly(data = balanceddata(), x = balanceddata()[,1], y = balanceddata()[,3],color = balanceddata()[input$varbalance])
-  
-})
-# KNN ET LR APRES L'EQUILIBRE 
-output$plot4 <- renderPlot({
-  
-  
-  df<- data.frame(lapply(balanceddata(), function(x) {
-    if(!is.numeric(x)) as.numeric(factor(x)) else x
-  }))
-  print(df)
-  df$y <- ifelse(df$y==1,0,1)
-  samples <- sample(1:nrow(df), 0.7*nrow(df))
-  trainclass <- df[samples, ]$y
-  testclass <- df[-samples, ]$y
-  train = df[samples, 1:(ncol(df)-1)]
-  test = df[-samples, 1:(ncol(df)-1)]
-  kmax <- 10
-  err_valid <- rep(NA,kmax)
-  for (k in 1:kmax) 
-  { 
-    print(k)
-    samples <- sample(1:nrow(df), 0.7*nrow(df))
-    pred <- knn(train,test,trainclass,k=18) 
-    err_valid[k] <- F1_Score(y_pred=pred,y_true=testclass)
-  } 
-  #plot(x=seq(1,kmax,by=1),y=err_test,type="o",col="blue")
-  boxplot(err_valid)
-  
-  
-})
-output$plot5 <- renderPlot({
-  df <- data()
-  df$y <- ifelse(df$y=="no",0,1)
-  kmax <- 10
-  err_valid <- rep(NA,kmax) 
-  for (k in 1:kmax) 
-  { 
-    samples <- sample(1:nrow(df), 0.7*nrow(df))
-    test_y <- df[-samples, ncol(df)]
-    test_X <- df[-samples, 1:(ncol(df)-1)]
-    print(k)
-    train <- df[samples, ]
-    model <- glm(y ~ .,data = train)
-    pred <- predict(model,test_X,type="response")
-    pred <- ifelse(pred>0.5,1,0)
-    err_valid[k] <- F1_Score(y_pred=pred,y_true=test_y)
+    filtervar1 <- data()[data()[var] == valeurchurn1, input$churnqual]
+    filtervar2 <- data()[data()[var] == valeurchurn2, input$churnqual]
     
-  } 
+    
+    
+    var1<-as.data.frame(filtervar1)
+    freq<- count(var1) 
+    print(freq)
+    freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
+    colnames(freq) <- c("value","occu","percent")
+    print(freq)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq$ymax <- cumsum(freq$percent)
+    
+    # Compute the bottom of each rectangle
+    freq$ymin <- c(0, head(freq$ymax, n=-1))
+    
+    # Compute label position
+    freq$labelPosition <- (freq$ymax + freq$ymin) / 2
+    
+    # Compute a good label
+    freq$label <- paste0(freq$percent,"%")
+    print(freq)
+    # Make the plot
+    var2<-as.data.frame(filtervar2)
+    freq2<- count(var2) 
+    print("freq2")
+    print(freq2)
+    freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
+    colnames(freq2) <- c("value","occu","percent")
+    print(freq2)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq2$ymax <- cumsum(freq2$percent)
+    
+    # Compute the bottom of each rectangle
+    freq2$ymin <- c(0, head(freq2$ymax, n=-1))
+    
+    # Compute label position
+    freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
+    
+    # Compute a good label
+    freq2$label <- paste0(freq2$percent,"%")
+    print(freq2)
+    # Make the plot
+    
+    print(values[1,1])
+    print(values[2,1])
+    plot <- plot_ly(labels = ~value, values = ~percent,textinfo = 'value+percent') %>%
+      add_pie(data = freq, name = values[1,1], domain = list(row = 0, column = 0))%>%
+      add_pie(data = freq2, name = values[2,1], domain = list(row = 0, column = 1))%>%
+      layout(title = paste("Distribution de",input$churnqual,"par rapport a ",input$churnchoice), showlegend = T,
+             grid=list(rows=1, columns=2),
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             annotations = list(x = c(0, .5),
+                                y = c(0, 0),text = c(paste("Distribution \n % Churn = ", values[1,1]),paste("Distribution \n % Churn = ", values[2,1])),
+                                xref = "papper",
+                                yref = "papper",
+                                showarrow = F
+             ))
+    
+    return(plot)
+  })
+  output$plot1 <- renderPlot({
+    
+    
+    df<- data.frame(lapply(data(), function(x) {
+      if(!is.numeric(x)) as.numeric(factor(x)) else x
+    }))
+    df$y <- ifelse(df$y==1,0,1)
+    samples <- sample(1:nrow(df), 0.7*nrow(df))
+    trainclass <- df[samples, ]$y
+    testclass <- df[-samples, ]$y
+    train = df[samples, 1:(ncol(df)-1)]
+    test = df[-samples, 1:(ncol(df)-1)]
+    kmax <- 10
+    err_valid <- rep(NA,kmax)
+    for (k in 1:kmax) 
+    { 
+      print(k)
+      samples <- sample(1:nrow(df), 0.7*nrow(df))
+      pred <- knn(train,test,trainclass,k=18) 
+      err_valid[k] <- F1_Score(y_pred=pred,y_true=testclass)
+    } 
+    #plot(x=seq(1,kmax,by=1),y=err_test,type="o",col="blue")
+    boxplot(err_valid)
+    
+    
+  })
+  output$plot2 <- renderPlot({
+    df <- data()
+    df$y <- ifelse(df$y=="no",0,1)
+    kmax <- 10
+    err_valid <- rep(NA,kmax) 
+    for (k in 1:kmax) 
+    { 
+      samples <- sample(1:nrow(df), 0.7*nrow(df))
+      test_y <- df[-samples, ncol(df)]
+      test_X <- df[-samples, 1:(ncol(df)-1)]
+      print(k)
+      train <- df[samples, ]
+      model <- glm(y ~ .,data = train)
+      pred <- predict(model,test_X,type="response")
+      pred <- ifelse(pred>0.5,1,0)
+      err_valid[k] <- F1_Score(y_pred=pred,y_true=test_y)
+      
+    } 
+    
+    boxplot(err_valid)
+    
+  })
+  output$churnquantplot  <- renderPlotly({
+    print(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])))
+    validate(
+      need(nrow(unique(data()[input$churnchoice])) == 2, "Veuillez Choisir une variable Churn dans l'onglet 'Churn Variable' "),
+      need(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])) != 0, "Aucune Variable qualitative Detecte")
+    )
+    filtervar1 <- data()
+    filtervar2 <- data()
+    var <- input$churnchoice
+    values<-unique(data()[var])
+    print(values)
+    print(values[1,1])
+    print(values[2,1])
+    valeurchurn1 <- values[1,1]
+    valeurchurn2 <- values[2,1]
+    
+    filtervar1 <- data()[data()[var] == valeurchurn1, input$churnquant]
+    filtervar2 <- data()[data()[var] == valeurchurn2, input$churnquant]
+    maxvar1<-max(filtervar1)
+    maxvar2<-max(filtervar2)
+    minvar1<-min(filtervar1)
+    minvar2<-min(filtervar2)
+    
+    stepvar1<-abs((1/(2**(input$sliderquant-1)))*maxvar1)
+    stepvar2<-abs((1/(2**(input$sliderquant-1)))*maxvar2)
+    length<-2**(input$sliderquant)
+    print(input$sliderquant)
+    print(stepvar1)
+    print(stepvar2)
+    filtervar1<-cut(filtervar1, seq(minvar1,maxvar1,length.out = length))
+    filtervar2<-cut(filtervar2, seq(minvar2,maxvar2,length.out = length))
+    
+    
+    var1<-as.data.frame(filtervar1)
+    freq<- count(var1) 
+    print(freq)
+    freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
+    colnames(freq) <- c("value","occu","percent")
+    print(freq)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq$ymax <- cumsum(freq$percent)
+    
+    # Compute the bottom of each rectangle
+    freq$ymin <- c(0, head(freq$ymax, n=-1))
+    
+    # Compute label position
+    freq$labelPosition <- (freq$ymax + freq$ymin) / 2
+    
+    # Compute a good label
+    freq$label <- paste0(freq$percent,"%")
+    print(freq)
+    # Make the plot
+    var2<-as.data.frame(filtervar2)
+    freq2<- count(var2) 
+    print("freq2")
+    print(freq2)
+    freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
+    colnames(freq2) <- c("value","occu","percent")
+    print(freq2)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq2$ymax <- cumsum(freq2$percent)
+    
+    # Compute the bottom of each rectangle
+    freq2$ymin <- c(0, head(freq2$ymax, n=-1))
+    
+    # Compute label position
+    freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
+    
+    # Compute a good label
+    freq2$label <- paste0(freq2$percent,"%")
+    print(freq2)
+    # Make the plot
+    
+    print(values[1,1])
+    print(values[2,1])
+    plot <- plot_ly(labels = ~value, values = ~percent,textinfo = 'value+percent') %>%
+      add_pie(data = freq, name = values[1,1], domain = list(row = 0, column = 0))%>%
+      add_pie(data = freq2, name = values[2,1], domain = list(row = 0, column = 1))%>%
+      layout(title = paste("Distribution de",input$churnquant,"par rapport a ",input$churnchoice), showlegend = T,
+             grid=list(rows=1, columns=2),
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             annotations = list(x = c(0, .5),
+                                y = c(0, 0),text = c(paste("Distribution \n % Churn = ", values[1,1]),paste("Distribution \n % Churn = ", values[2,1])),
+                                xref = "papper",
+                                yref = "papper",
+                                showarrow = F
+             ))
+    
+    return(plot)
+  })
   
-  boxplot(err_valid)
   
-})
+  output$churnquantplot2  <- renderPlotly({
+    print(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])))
+    validate(
+      need(nrow(unique(data()[input$churnchoice])) == 2, "Veuillez Choisir une variable Churn dans l'onglet 'Churn Variable' "),
+      need(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])) != 0, "Aucune Variable qualitative Detecte")
+    )
+    filtervar1 <- data()
+    filtervar2 <- data()
+    var <- input$churnchoice
+    values<-unique(data()[var])
+    print(values)
+    print(values[1,1])
+    print(values[2,1])
+    valeurchurn1 <- values[1,1]
+    valeurchurn2 <- values[2,1]
+    
+    filtervar1 <- data()[data()[var] == valeurchurn1, input$churnquant]
+    filtervar2 <- data()[data()[var] == valeurchurn2, input$churnquant]
+    
+    
+    var1<-as.data.frame(filtervar1)
+    freq<- count(var1) 
+    print(freq)
+    freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
+    colnames(freq) <- c("value","occu","percent")
+    print(freq)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq$ymax <- cumsum(freq$percent)
+    
+    # Compute the bottom of each rectangle
+    freq$ymin <- c(0, head(freq$ymax, n=-1))
+    
+    # Compute label position
+    freq$labelPosition <- (freq$ymax + freq$ymin) / 2
+    
+    # Compute a good label
+    freq$label <- paste0(freq$percent,"%")
+    print(freq)
+    # Make the plot
+    var2<-as.data.frame(filtervar2)
+    freq2<- count(var2) 
+    print("freq2")
+    print(freq2)
+    freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
+    colnames(freq2) <- c("value","occu","percent")
+    print(freq2)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq2$ymax <- cumsum(freq2$percent)
+    
+    # Compute the bottom of each rectangle
+    freq2$ymin <- c(0, head(freq2$ymax, n=-1))
+    
+    # Compute label position
+    freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
+    
+    # Compute a good label
+    freq2$label <- paste0(freq2$percent,"%")
+    print(freq2)
+    # Make the plot
+    
+    print(values[1,1])
+    print(values[2,1])
+    tab<-cbind(freq$value,freq$occu,freq2$occu)
+    tab<- as.data.frame(tab)
+    colnames(tab)<-c("value","occu1","occu2")
+    colnames(tab)
+    fig <- plot_ly(tab, x = ~value, y = ~occu1, type = 'bar', name = valeurchurn1)
+    fig <- fig %>% add_trace(y = ~occu2, name = valeurchurn2)
+    fig <- fig %>% layout(yaxis = list(title = 'Count'), barmode = 'group')
+    
+    return(fig)
+  })
+  
+  
+  output$churnquantplot3 <- renderPlot({
+    print(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])))
+    validate(
+      need(nrow(unique(data()[input$churnchoice])) == 2, "Veuillez Choisir une variable Churn dans l'onglet 'Churn Variable' "),
+      need(nrow(count(names(data())[!grepl('factor|logical|character',sapply(data(),class))])) != 0, "Aucune Variable qualitative Detecte")
+    )
+    
+    tab<-cbind(data()[input$churnchoice],data()[input$churnquant],data()[input$pairwise1],data()[input$pairwise2])
+    tab<-as.data.frame(tab)
+    colnames(tab)<-c("var0","var1","var2","var3")
+    colnames(tab)
+    
+    print(tab)
+    my_cols <- c("#000FF", "#FF0000")  
+    print(tab[,2:4])
+    fig <- ggpairs(tab, columns = 2:4,olumnLabels = c(input$churnquant,input$pairwise1,input$pairwise2),ggplot2::aes(colour=var0))
+    return(fig)
+  })
+  
+  #------------------ Balanced Data -----------------
+  samplevalue<- reactive({
+    validate(
+      need(nrow(unique(data()[input$varbalance])) == 2, "... En attente de la variable ...")
+    )
+    method<-input$sampling
+    choice<-input$varbalance
+    df<- data.frame(lapply(data(), function(x) {
+      if(!is.numeric(x)) as.numeric(factor(x)) else x
+    }))
+    df[,input$varbalance] <- ifelse(df[,input$varbalance]==1,0,1)
+    samples <- sample(1:nrow(df), 0.7*nrow(df))
+    train = df[samples, 1:(ncol(df))]
+    
+    data<-train
+    
+    values<-unique(data[choice])
+    
+    print(values)
+    print(values[1,1])
+    print(values[2,1])
+    valeurchoice1 <- values[1,1]
+    valeurchoice2 <- values[2,1]
+    print(valeurchoice1)
+    print("----------------------------------")
+    print(method)
+    var1<-as.data.frame(data[data[choice] == valeurchoice1,choice])
+    var2<-as.data.frame(data[data[choice] == valeurchoice2,choice])
+    print(count(var1))
+    if(method=="Random Oversampling"){
+      
+      n_samp<-max(count(var1)$freq,count(var2)$freq)
+      print("n_samp")
+      print(n_samp)
+      return(n_samp)
+    }
+    if(method=="Random UnderSampling"){
+      
+      n_samp<-min(count(var1)$freq,count(var2)$freq)
+      print("n_samp")
+      print(n_samp)
+      return(n_samp)
+    }
+    if(method=="Both"){
+      n_samp<-max(count(var1)$freq,count(var2)$freq)
+      print("n_samp")
+      print(n_samp)
+      return(n_samp)
+    }
+    # if(method=="Smote"){
+    #   n_samp<-max(count(var1)$freq,count(var2)$freq)
+    #   n_samp<-cbind(n_samp,min(count(var1)$freq,count(var2)$freq))
+    #   print(method)
+    #   return(n_samp)
+    # }
+    
+  })
+  
+  balanceddata<- eventReactive(input$go,{
+    print("worked!")
+    df<- data.frame(lapply(data(), function(x) {
+      if(!is.numeric(x)) as.numeric(factor(x)) else x
+    }))
+    df[,input$varbalance] <- ifelse(df[,input$varbalance]==1,0,1)
+    samples <- sample(1:nrow(df), 0.7*nrow(df))
+    train = df[samples, 1:(ncol(df))]
+    
+    data<-train
+    print(data)
+    method<-input$sampling
+    choice<-input$varbalance
+    n_samp<-samplevalue()*2
+    f<-paste(choice," ~ ",paste(names(data()[names(data())!=choice]),collapse=" + "))
+    print(paste("f = ",f))
+    print(paste("f as formula = ",f))
+    f<-as.formula(f)
+    curr_frame <<- sys.nframe()
+    if(method=="Random Oversampling"){
+      over_res<-ovun.sample(get("f", sys.frame(curr_frame)), data=get("data", sys.frame(curr_frame)), method="over", N=get("n_samp", sys.frame(curr_frame)), seed=2021)$data
+      print(over_res)
+      return(over_res)
+    }
+    if(method=="Random UnderSampling"){
+      under_res<-ovun.sample(get("f", sys.frame(curr_frame)), data=get("data", sys.frame(curr_frame)), method="under", N=get("n_samp", sys.frame(curr_frame)), seed=2021)$data
+      print(under_res)
+      return(under_res)
+    }
+    if(method=="Both"){
+      both_res<-ovun.sample(get("f", sys.frame(curr_frame)), data=get("data", sys.frame(curr_frame)), method="both", N=get("n_samp", sys.frame(curr_frame)),p=0.5, seed=2021)$data
+      print(both_res)
+      return(both_res)
+    }
+    # if(method=="Smote"){
+    #   n1<-n_samp[0]
+    #   n0<-n_samp[1]
+    #   r0<-0.6
+    #   ntimes<-(( 1 - r0) / r0 ) * ( n0 / n1 ) - 1
+    #   data[input$varbalance]<-factor(data[input$varbalance])
+    #   print(names(data[names(data)!=input$varbalance]))
+    #   smote_res<-SMOTE(X = data[names(data)!=input$varbalance], target = data[input$varbalance], K = 5, dup_size = ntimes)$data
+    #   print(smote_res)
+    #   return(smote_res)}
+  })
+  output$compare<-renderPlotly({
+    print("I'm here -1 ")
+    
+    print("I'm here 0 ")
+    var <- input$varbalance
+    filtervar1 <- data()[var] 
+    filtervar2 <- balanceddata()[var] 
+    print("I'm here 2 ")
+    
+    var1<-as.data.frame(filtervar1)
+    freq<- count(var1) 
+    print(freq)
+    freq<- cbind(freq,round(freq$freq/ nrow(var1)*100,2))
+    colnames(freq) <- c("value","occu","percent")
+    print(freq)
+    print("I'm here 3 ")
+    # Compute the cumulative percentages (top of each rectangle)
+    freq$ymax <- cumsum(freq$percent)
+    
+    # Compute the bottom of each rectangle
+    freq$ymin <- c(0, head(freq$ymax, n=-1))
+    
+    # Compute label position
+    freq$labelPosition <- (freq$ymax + freq$ymin) / 2
+    
+    # Compute a good label
+    freq$label <- paste0(freq$percent,"%")
+    print(freq)
+    # Make the plot
+    var2<-as.data.frame(filtervar2)
+    freq2<- count(var2) 
+    print("freq2")
+    print(freq2)
+    freq2<- cbind(freq2,round(freq2$freq/ nrow(var2)*100,2))
+    colnames(freq2) <- c("value","occu","percent")
+    print(freq2)
+    
+    # Compute the cumulative percentages (top of each rectangle)
+    freq2$ymax <- cumsum(freq2$percent)
+    
+    # Compute the bottom of each rectangle
+    freq2$ymin <- c(0, head(freq2$ymax, n=-1))
+    
+    # Compute label position
+    freq2$labelPosition <- (freq2$ymax + freq2$ymin) / 2
+    
+    # Compute a good label
+    freq2$label <- paste0(freq2$percent,"%")
+    print(freq2)
+    # Make the plot
+    plot <- plot_ly(labels = ~value, values = ~percent,textinfo = 'occu',hovertext=~occu) %>%
+      add_pie(data = freq, name = 'Avant', domain = list(row = 0, column = 0))%>%
+      add_pie(data = freq2, name = 'Apres', domain = list(row = 0, column = 1))%>%
+      layout(title = paste("Comparaisons des donnees avant et apres le sampling "), showlegend = T,
+             grid=list(rows=1, columns=2),
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             annotations = list(x = c(0, .5),
+                                y = c(0, 0),text = c("Avant","Apres"),
+                                xref = "papper",
+                                yref = "papper",
+                                showarrow = F
+             ))
+    
+    return(plot)
+    
+  })
+  output$balancedplot <- renderPlotly({
+    
+    plot_ly(data = balanceddata(), x = balanceddata()[,1], y = balanceddata()[,3],color = balanceddata()[input$varbalance])
+    
+  })
+  # KNN ET LR APRES L'EQUILIBRE 
+  output$plot4 <- renderPlot({
+    
+    
+    df<- data.frame(lapply(balanceddata(), function(x) {
+      if(!is.numeric(x)) as.numeric(factor(x)) else x
+    }))
+    print(df)
+    df$y <- ifelse(df$y==1,0,1)
+    samples <- sample(1:nrow(df), 0.7*nrow(df))
+    trainclass <- df[samples, ]$y
+    testclass <- df[-samples, ]$y
+    train = df[samples, 1:(ncol(df)-1)]
+    test = df[-samples, 1:(ncol(df)-1)]
+    kmax <- 10
+    err_valid <- rep(NA,kmax)
+    for (k in 1:kmax) 
+    { 
+      print(k)
+      samples <- sample(1:nrow(df), 0.7*nrow(df))
+      pred <- knn(train,test,trainclass,k=18) 
+      err_valid[k] <- F1_Score(y_pred=pred,y_true=testclass)
+    } 
+    #plot(x=seq(1,kmax,by=1),y=err_test,type="o",col="blue")
+    boxplot(err_valid)
+    
+    
+  })
+  output$plot5 <- renderPlot({
+    df <- data()
+    df$y <- ifelse(df$y=="no",0,1)
+    kmax <- 10
+    err_valid <- rep(NA,kmax) 
+    for (k in 1:kmax) 
+    { 
+      samples <- sample(1:nrow(df), 0.7*nrow(df))
+      test_y <- df[-samples, ncol(df)]
+      test_X <- df[-samples, 1:(ncol(df)-1)]
+      print(k)
+      train <- df[samples, ]
+      model <- glm(y ~ .,data = train)
+      pred <- predict(model,test_X,type="response")
+      pred <- ifelse(pred>0.5,1,0)
+      err_valid[k] <- F1_Score(y_pred=pred,y_true=test_y)
+      
+    } 
+    
+    boxplot(err_valid)
+    
+  })
   
 }
 shinyApp(ui, server)
